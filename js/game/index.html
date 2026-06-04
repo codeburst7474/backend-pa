@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelForge - Modern Image Editor</title>
+    <!-- Boxicons for modern icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="top-header">
+            <div class="logo">
+                <i class='bx bx-palette'></i>
+                <span>PixelForge</span>
+            </div>
+            
+            <div class="header-actions">
+                <div class="history-controls">
+                    <button class="action-btn" id="undo-btn" title="Undo (Ctrl+Z)" disabled>
+                        <i class='bx bx-undo'></i>
+                    </button>
+                    <button class="action-btn" id="redo-btn" title="Redo (Ctrl+Y)" disabled>
+                        <i class='bx bx-redo'></i>
+                    </button>
+                </div>
+                
+                <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" hidden>
+                <button class="primary-btn glass-btn" id="upload-btn">
+                    <i class='bx bx-upload'></i> Upload Image
+                </button>
+                
+                <button class="action-btn" id="theme-toggle" title="Toggle Theme">
+                    <i class='bx bx-moon'></i>
+                </button>
+                
+                <button class="primary-btn glow-btn" id="download-btn" disabled>
+                    <i class='bx bx-download'></i> Export
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="main-layout">
+            <!-- Left Sidebar - Tools -->
+            <aside class="sidebar left-sidebar" id="left-sidebar">
+                <div class="tools-menu">
+                    <button class="tool-btn active" data-tool="filters">
+                        <i class='bx bx-slider-alt'></i>
+                        <span>Filters</span>
+                    </button>
+                    <button class="tool-btn" data-tool="transform">
+                        <i class='bx bx-crop'></i>
+                        <span>Transform</span>
+                    </button>
+                    <button class="tool-btn" data-tool="draw">
+                        <i class='bx bx-brush'></i>
+                        <span>Draw</span>
+                    </button>
+                    <button class="tool-btn" data-tool="text">
+                        <i class='bx bx-text'></i>
+                        <span>Text</span>
+                    </button>
+                    <button class="tool-btn" data-tool="shapes">
+                        <i class='bx bx-shape-square'></i>
+                        <span>Shapes</span>
+                    </button>
+                    <button class="tool-btn" data-tool="resize">
+                        <i class='bx bx-expand'></i>
+                        <span>Resize</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Workspace Center -->
+            <main class="workspace" id="workspace">
+                <div class="empty-state" id="empty-state">
+                    <div class="upload-area" id="drop-zone">
+                        <i class='bx bx-image-add upload-icon'></i>
+                        <h3>Drag & Drop an image here</h3>
+                        <p>or click Upload Image above</p>
+                        <span class="support-text">Supports JPG, PNG, WEBP</span>
+                    </div>
+                </div>
+                
+                <div class="canvas-container hidden" id="canvas-wrapper">
+                    <canvas id="main-canvas"></canvas>
+                </div>
+                
+                <!-- Loading Overlay -->
+                <div class="loading-overlay hidden" id="loading-overlay">
+                    <div class="spinner"></div>
+                    <p>Processing...</p>
+                </div>
+            </main>
+
+            <!-- Right Sidebar - Properties -->
+            <aside class="sidebar right-sidebar hidden" id="right-sidebar">
+                <div class="properties-panel">
+                    
+                    <!-- Filters Panel -->
+                    <div class="panel-section active" id="panel-filters">
+                        <h3 class="panel-title">Filters</h3>
+                        
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Brightness</label>
+                                <span class="value">100%</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="brightness" min="0" max="200" value="100">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Contrast</label>
+                                <span class="value">100%</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="contrast" min="0" max="200" value="100">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Saturation</label>
+                                <span class="value">100%</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="saturate" min="0" max="200" value="100">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Grayscale</label>
+                                <span class="value">0%</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="grayscale" min="0" max="100" value="0">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Sepia</label>
+                                <span class="value">0%</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="sepia" min="0" max="100" value="0">
+                        </div>
+
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Blur</label>
+                                <span class="value">0px</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="blur" min="0" max="20" value="0">
+                        </div>
+
+                        <div class="filter-group">
+                            <div class="slider-header">
+                                <label>Hue Rotate</label>
+                                <span class="value">0deg</span>
+                            </div>
+                            <input type="range" class="custom-slider" data-filter="hue-rotate" min="0" max="360" value="0">
+                        </div>
+                        
+                        <button class="secondary-btn full-width" id="reset-filters">Reset Filters</button>
+                    </div>
+
+                    <!-- Transform Panel -->
+                    <div class="panel-section" id="panel-transform">
+                        <h3 class="panel-title">Transform</h3>
+                        
+                        <div class="transform-actions">
+                            <label class="section-label">Rotate</label>
+                            <div class="btn-group">
+                                <button class="icon-btn" data-action="rotate-left" title="Rotate Left">
+                                    <i class='bx bx-rotate-left'></i>
+                                </button>
+                                <button class="icon-btn" data-action="rotate-right" title="Rotate Right">
+                                    <i class='bx bx-rotate-right'></i>
+                                </button>
+                            </div>
+                            
+                            <label class="section-label mt-3">Flip</label>
+                            <div class="btn-group">
+                                <button class="icon-btn" data-action="flip-x" title="Flip Horizontal">
+                                    <i class='bx bx-reflect-vertical'></i>
+                                </button>
+                                <button class="icon-btn" data-action="flip-y" title="Flip Vertical">
+                                    <i class='bx bx-reflect-horizontal'></i>
+                                </button>
+                            </div>
+
+                            <label class="section-label mt-3">Zoom</label>
+                            <div class="btn-group">
+                                <button class="icon-btn" data-action="zoom-out" title="Zoom Out">
+                                    <i class='bx bx-zoom-out'></i>
+                                </button>
+                                <button class="icon-btn" data-action="zoom-in" title="Zoom In">
+                                    <i class='bx bx-zoom-in'></i>
+                                </button>
+                            </div>
+                            <span class="zoom-value" id="zoom-value-display">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- Draw Panel -->
+                    <div class="panel-section" id="panel-draw">
+                        <h3 class="panel-title">Drawing</h3>
+                        
+                        <div class="draw-tools">
+                            <button class="tool-mode-btn active" data-mode="brush">
+                                <i class='bx bx-brush'></i> Brush
+                            </button>
+                            <button class="tool-mode-btn" data-mode="eraser">
+                                <i class='bx bx-eraser'></i> Eraser
+                            </button>
+                        </div>
+                        
+                        <div class="property-group mt-3">
+                            <label>Color</label>
+                            <input type="color" id="draw-color" value="#ffffff" class="color-picker">
+                        </div>
+                        
+                        <div class="property-group">
+                            <div class="slider-header">
+                                <label>Size</label>
+                                <span class="value" id="draw-size-val">5px</span>
+                            </div>
+                            <input type="range" class="custom-slider" id="draw-size" min="1" max="100" value="5">
+                        </div>
+                    </div>
+
+                    <!-- Text Panel -->
+                    <div class="panel-section" id="panel-text">
+                        <h3 class="panel-title">Add Text</h3>
+                        
+                        <input type="text" id="text-input" class="text-input" placeholder="Enter text here...">
+                        
+                        <div class="property-group mt-3">
+                            <label>Font Family</label>
+                            <select id="font-family" class="custom-select">
+                                <option value="Inter">Inter</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Impact">Impact</option>
+                            </select>
+                        </div>
+                        
+                        <div class="property-group">
+                            <div class="slider-header">
+                                <label>Font Size</label>
+                                <span class="value" id="text-size-val">30px</span>
+                            </div>
+                            <input type="range" class="custom-slider" id="text-size" min="10" max="200" value="30">
+                        </div>
+                        
+                        <div class="property-group">
+                            <label>Color</label>
+                            <input type="color" id="text-color" value="#ffffff" class="color-picker">
+                        </div>
+                        
+                        <div class="text-styles btn-group mt-2">
+                            <button class="icon-btn" id="text-bold" title="Bold"><i class='bx bx-bold'></i></button>
+                            <button class="icon-btn" id="text-italic" title="Italic"><i class='bx bx-italic'></i></button>
+                        </div>
+                        
+                        <button class="primary-btn full-width mt-3" id="add-text-btn">Add to Image</button>
+                        <p class="helper-text">Click on canvas to place text.</p>
+                    </div>
+
+                    <!-- Shapes Panel -->
+                    <div class="panel-section" id="panel-shapes">
+                        <h3 class="panel-title">Shapes</h3>
+                        
+                        <div class="shape-grid">
+                            <button class="shape-btn" data-shape="rectangle" title="Rectangle">
+                                <i class='bx bx-stop'></i>
+                            </button>
+                            <button class="shape-btn" data-shape="circle" title="Circle">
+                                <i class='bx bx-circle'></i>
+                            </button>
+                            <button class="shape-btn" data-shape="line" title="Line">
+                                <i class='bx bx-minus'></i>
+                            </button>
+                            <button class="shape-btn" data-shape="triangle" title="Triangle">
+                                <i class='bx bx-up-arrow'></i>
+                            </button>
+                        </div>
+                        
+                        <div class="property-group mt-3">
+                            <label>Outline Color</label>
+                            <input type="color" id="shape-color" value="#ffffff" class="color-picker">
+                        </div>
+                        
+                        <div class="property-group">
+                            <div class="slider-header">
+                                <label>Stroke Width</label>
+                                <span class="value" id="shape-width-val">3px</span>
+                            </div>
+                            <input type="range" class="custom-slider" id="shape-width" min="1" max="20" value="3">
+                        </div>
+                        
+                        <label class="checkbox-container mt-2">
+                            <input type="checkbox" id="shape-fill">
+                            <span class="checkmark"></span>
+                            Fill Shape
+                        </label>
+                        <div class="property-group mt-2 hidden" id="shape-fill-color-group">
+                            <label>Fill Color</label>
+                            <input type="color" id="shape-fill-color" value="#3b82f6" class="color-picker">
+                        </div>
+                    </div>
+
+                    <!-- Resize Panel -->
+                    <div class="panel-section" id="panel-resize">
+                        <h3 class="panel-title">Resize</h3>
+                        
+                        <div class="property-group">
+                            <label>Width (px)</label>
+                            <input type="number" id="resize-w" class="num-input">
+                        </div>
+                        <div class="property-group">
+                            <label>Height (px)</label>
+                            <input type="number" id="resize-h" class="num-input">
+                        </div>
+                        
+                        <label class="checkbox-container mt-2">
+                            <input type="checkbox" id="maintain-aspect" checked>
+                            <span class="checkmark"></span>
+                            Maintain Aspect Ratio
+                        </label>
+                        
+                        <button class="primary-btn full-width mt-3" id="apply-resize-btn">Apply Resize</button>
+                    </div>
+
+                </div>
+            </aside>
+        </div>
+        
+        <!-- Export Modal -->
+        <div class="modal" id="export-modal">
+            <div class="modal-content glass-effect">
+                <div class="modal-header">
+                    <h3>Export Image</h3>
+                    <button class="close-modal"><i class='bx bx-x'></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="property-group">
+                        <label>Format</label>
+                        <select id="export-format" class="custom-select">
+                            <option value="image/png">PNG</option>
+                            <option value="image/jpeg">JPG</option>
+                            <option value="image/webp">WEBP</option>
+                        </select>
+                    </div>
+                    <div class="property-group mt-3" id="export-quality-group">
+                        <div class="slider-header">
+                            <label>Quality</label>
+                            <span class="value" id="quality-val">90%</span>
+                        </div>
+                        <input type="range" class="custom-slider" id="export-quality" min="10" max="100" value="90">
+                    </div>
+                    <div class="property-group mt-3">
+                        <label>File Name</label>
+                        <input type="text" id="export-filename" class="text-input" value="edited-image">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn" id="cancel-export">Cancel</button>
+                    <button class="primary-btn glow-btn" id="confirm-export">Download</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
